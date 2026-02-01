@@ -62,7 +62,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             if(jwtService.validateToken(token,userDetails)) {
 
                 // Create authentication object
-                UsernamePasswordAuthenticationToken authenticationToken= new UsernamePasswordAuthenticationToken(userDetails,
+                UsernamePasswordAuthenticationToken authenticationToken =
+                        new UsernamePasswordAuthenticationToken(userDetails,
                         null,
                         userDetails.getAuthorities()
                 );

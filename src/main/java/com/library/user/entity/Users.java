@@ -32,7 +32,7 @@ public class Users extends BaseModel{
     @Column(name = "name")
     private String name;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = true)
     private String username;
 
     @Column(name = "email", unique = true)
@@ -51,6 +51,12 @@ public class Users extends BaseModel{
 
     @Column(length = 255)
     private String verificationCode;
+
+    private String provider; // google, facebook, local
+
+    private String providerId;
+
+    private boolean passwordSet;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

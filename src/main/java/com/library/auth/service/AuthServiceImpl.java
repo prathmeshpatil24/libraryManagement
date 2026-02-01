@@ -5,6 +5,7 @@ import com.library.auth.dto.LoginRequest;
 import com.library.auth.dto.LoginResponse;
 import com.library.auth.dto.RegisterRequest;
 import com.library.auth.enums.EmailPurpose;
+import com.library.common.exception.DuplicateResourceException;
 import com.library.common.exception.EmailException;
 import com.library.common.exception.UserNotFoundException;
 import com.library.common.security.CustomUserDetails;
@@ -54,9 +55,10 @@ public class AuthServiceImpl implements AuthService{
             throw new BadRequestException("user with this mobileNo is already present, please try new mobile no");
         }
 
-        if (usersRepository.findByUsername(request.getUsername()).isPresent()){
-            throw new BadRequestException("Username is already taken, please choose another one");
+        if (usersRepository.existsByUsername(request.getUsername())) {
+            throw new DuplicateResourceException("Username already taken");
         }
+
 
         try {
             // Create new user entity
@@ -66,6 +68,8 @@ public class AuthServiceImpl implements AuthService{
             user.setEmail(request.getEmail());
             user.setMobileNo(request.getMobileNo());
             user.setPassword(passwordEncoder.encode(request.getPassword()));
+            user.setPasswordSet(true);
+            user.setProvider("LOCAL");
 
             //for testing purpose
          /*
@@ -133,6 +137,8 @@ public class AuthServiceImpl implements AuthService{
         admin.setMobileNo(request.getMobileNo());
 //        admin.setPassword(dto.getPassword());
         admin.setPassword(passwordEncoder.encode(request.getPassword()));
+        admin.setPasswordSet(true);
+        admin.setProvider("LOCAL");
 
         // Must verify
         String token = UUID.randomUUID().toString();
@@ -192,6 +198,8 @@ public class AuthServiceImpl implements AuthService{
         lib.setMobileNo(request.getMobileNo());
 //        admin.setPassword(dto.getPassword());
         lib.setPassword(passwordEncoder.encode(request.getPassword()));
+        lib.setPasswordSet(true);
+        lib.setProvider("LOCAL");
 
         // Must verify
         String token = UUID.randomUUID().toString();
@@ -253,7 +261,7 @@ public class AuthServiceImpl implements AuthService{
         // 1. Authenticate user (Spring Security handles validation)
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        loginRequest.getUserName(),
+                        loginRequest.getUsername(),
                         loginRequest.getPassword()
                 )
         );
@@ -334,7 +342,6 @@ public class AuthServiceImpl implements AuthService{
             throw new RuntimeException(e);
         }
     }
-
 
     private void sendVerificationLink(Users user, EmailPurpose emailPurpose) {
 

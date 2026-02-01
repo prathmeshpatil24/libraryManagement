@@ -23,5 +23,7 @@ public class AdminController {
 
      adminService.updateRoles(request);
 
+        return ResponseEntity.ok("Role updated successfully");
+
     }
 }

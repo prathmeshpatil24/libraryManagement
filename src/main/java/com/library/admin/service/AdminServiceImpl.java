@@ -32,7 +32,7 @@ public class AdminServiceImpl implements AdminService{
         Roles role = rolesRepository.findByRoleName(request.getRole())
                 .orElseThrow(() ->
                         new RoleNotFoundException(
-                                "Role not found: " + request.getRole()
+                                "Role not found" + request.getRole()
                         )
                 );
 

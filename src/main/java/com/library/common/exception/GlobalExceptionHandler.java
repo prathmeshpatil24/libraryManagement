@@ -97,29 +97,30 @@ public class GlobalExceptionHandler {
                 ));
     }
 
-//    @ExceptionHandler(InActiveCategoryException.class)
-//    public ResponseEntity<?> handleInActiveCategoryException(InActiveCategoryException ex) {
-//        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                .body(Map.of(
-//                        "status", HttpStatus.BAD_REQUEST.value(),
-//                        "error", "Failed to Save",
-//                        "message", ex.getMessage(),
-//                        "timestamp", LocalDateTime.now()
-//                ));
-//    }
-//
-//    @ExceptionHandler(InvalidPaginationParameterException.class)
-//    public ResponseEntity<?> handleInvalidPaginationException(InvalidPaginationParameterException ex) {
-//        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                .body(Map.of(
-//                        "status", HttpStatus.BAD_REQUEST.value(),
-//                        "error", "Failed to retried",
-//                        "message", ex.getMessage(),
-//                        "timestamp", LocalDateTime.now()
-//                ));
-//    }
-//
 
+
+    @ExceptionHandler(RoleNotFoundException.class)
+    public ResponseEntity<?> handleRoleNotFoundException(RoleNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of(
+                        "status", HttpStatus.NOT_FOUND.value(),
+                        "error", "Role Not Found",
+                        "message", ex.getMessage(),
+                        "timestamp", LocalDateTime.now()
+                ));
+
+    }
+
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<?> handleDuplicateResourceException(DuplicateResourceException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "status", HttpStatus.CONFLICT.value(),
+                        "error", "Duplicate Resource",
+                        "message", ex.getMessage(),
+                        "timestamp", LocalDateTime.now()
+                ));
+    }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<?> handleUserNotFoundException(UserNotFoundException ex) {

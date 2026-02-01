@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class LoginRequest {
 
-    private String userName;
+    private String username;
 
     @NotBlank(message = "Password must not be empty")
     @Pattern(

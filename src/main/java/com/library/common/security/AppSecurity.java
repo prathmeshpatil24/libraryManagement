@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -27,6 +28,15 @@ public class AppSecurity {
 
     @Autowired
     private JWTService jwtService;
+
+    @Autowired
+    private CustomOAuth2UserService customOAuth2UserService;
+
+    @Autowired
+    private OAuth2AuthenticationSuccessHandler successHandler;
+
+    @Autowired
+    private OAuth2AuthenticationFailureHandler failureHandler;
 
 
     @Bean
@@ -52,27 +62,29 @@ public class AppSecurity {
 
         http
                 .csrf(csrf -> csrf.disable())
+                // REQUIRED for OAuth2 login
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // Public APIs (no authentication)
                         .requestMatchers(
                                 "/api/auth/**",
+                                "/oauth2/**",
+                                "/login/oauth2/**",
                                 "/swagger-ui/**",
                                 "/actuator/**"
                         ).permitAll()
-                        // admin only
-                        .requestMatchers("/api/admin/**")
-                        .hasRole("ADMIN")
-                       // .requestMatchers("/actuator/**")
-                        //.hasRole("ADMIN")
-                        // user only
-                        .requestMatchers("/api/**")
-                        .hasAnyRole("USER", "ADMIN")
-                        // any end-point
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest()
                         .authenticated()
+                )
+                .oauth2Login(oauth -> oauth
+                        .userInfoEndpoint(user->
+                                user.userService(customOAuth2UserService)
+                        )
+                        .successHandler(successHandler)
+                        .failureHandler(failureHandler)
                 )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
