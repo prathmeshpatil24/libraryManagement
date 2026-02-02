@@ -11,6 +11,7 @@ import com.library.common.exception.UserNotFoundException;
 import com.library.common.security.CustomUserDetails;
 import com.library.common.security.JWTService;
 import com.library.common.utils.service.EmailServiceImpl;
+import com.library.common.utils.service.RoleCache;
 import com.library.user.entity.Roles;
 import com.library.user.entity.Users;
 import com.library.user.repository.RolesRepository;
@@ -35,6 +36,8 @@ public class AuthServiceImpl implements AuthService{
     private final UsersRepository usersRepository;
 
     private final RolesRepository rolesRepository;
+
+    private final RoleCache roleCache;
 
     private final EmailServiceImpl emailService;
 
@@ -83,11 +86,12 @@ public class AuthServiceImpl implements AuthService{
             user.setIsActive(false);
 
             // Assign default role
-            Roles roleUser = rolesRepository.findByRoleName("ROLE_USER")
-                    //.findById(1)
-                    .orElseThrow(() -> new RuntimeException("Role USER not found"));
+//            Roles roleUser = rolesRepository.findByRoleName("ROLE_USER")
+//                    //.findById(1)
+//                    .orElseThrow(() -> new RuntimeException("Role USER not found"));
+            Roles roles = roleCache.getRoleByName("ROLE_USER");
 
-            user.getRoles().add(roleUser);
+            user.getRoles().add(roles);
 
             Users savedUser = usersRepository.save(user);
 
@@ -115,11 +119,12 @@ public class AuthServiceImpl implements AuthService{
             Users user = existing.get();
 
             // User already exists → upgrade role
-            Roles adminRole = rolesRepository.findByRoleName("ROLE_ADMIN")
-                    //.findById(1)
-                    .orElseThrow(() -> new RuntimeException("Role ADMIN not found"));
+//            Roles adminRole = rolesRepository.findByRoleName("ROLE_ADMIN")
+//                    //.findById(1)
+//                    .orElseThrow(() -> new RuntimeException("Role ADMIN not found"));
+            Roles roles = roleCache.getRoleByName("ROLE_ADMIN");
 
-            user.getRoles().add(adminRole);
+            user.getRoles().add(roles);
 
             usersRepository.save(user);
             result.put("user", user);
@@ -146,11 +151,11 @@ public class AuthServiceImpl implements AuthService{
         admin.setIsActive(false);
 
         // Assign admin role
-        Roles adminRole = rolesRepository.findByRoleName("ROLE_ADMIN")
-                //.findById(2)
-                .orElseThrow(() -> new BadRequestException("Role ADMIN not found"));
-
-        admin.getRoles().add(adminRole);
+//        Roles adminRole = rolesRepository.findByRoleName("ROLE_ADMIN")
+//                //.findById(2)
+//                .orElseThrow(() -> new BadRequestException("Role ADMIN not found"));
+        Roles roles = roleCache.getRoleByName("ROLE_ADMIN");
+        admin.getRoles().add(roles);
 
         Users savedAdmin = usersRepository.save(admin);
 
@@ -176,11 +181,12 @@ public class AuthServiceImpl implements AuthService{
             Users user = existing.get();
 
             // User already exists → upgrade role
-            Roles librarianRole = rolesRepository.findByRoleName("ROLE_LIBRARIAN")
-                    //.findById(1)
-                    .orElseThrow(() -> new RuntimeException("Role ROLE_LIBRARIAN not found"));
+//            Roles librarianRole = rolesRepository.findByRoleName("ROLE_LIBRARIAN")
+//                    //.findById(1)
+//                    .orElseThrow(() -> new RuntimeException("Role ROLE_LIBRARIAN not found"));
 
-            user.getRoles().add(librarianRole);
+            Roles roles = roleCache.getRoleByName("ROLE_LIBRARIAN");
+            user.getRoles().add(roles);
 
             usersRepository.save(user);
             result.put("user", user);
@@ -207,11 +213,12 @@ public class AuthServiceImpl implements AuthService{
         lib.setIsActive(false);
 
         // Assign admin role
-        Roles librarianRole = rolesRepository.findByRoleName("ROLE_LIBRARIAN")
-                //.findById(2)
-                .orElseThrow(() -> new BadRequestException("Role LIBRARIAN not found"));
+//        Roles librarianRole = rolesRepository.findByRoleName("ROLE_LIBRARIAN")
+//                //.findById(2)
+//                .orElseThrow(() -> new BadRequestException("Role LIBRARIAN not found"));
+        Roles roles = roleCache.getRoleByName("ROLE_LIBRARIAN");
 
-        lib.getRoles().add(librarianRole);
+        lib.getRoles().add(roles);
 
         Users savedLib = usersRepository.save(lib);
 

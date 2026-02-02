@@ -3,6 +3,7 @@ package com.library.admin.service;
 import com.library.admin.dto.RoleActionRequest;
 import com.library.common.exception.RoleNotFoundException;
 import com.library.common.exception.UserNotFoundException;
+import com.library.common.utils.service.RoleCache;
 import com.library.user.entity.Roles;
 import com.library.user.entity.Users;
 import com.library.user.repository.RolesRepository;
@@ -18,6 +19,7 @@ public class AdminServiceImpl implements AdminService{
 
     private final UsersRepository usersRepository;
     private final RolesRepository rolesRepository;
+    private final RoleCache roleCache;
 
     @Override
     public String updateRoles(RoleActionRequest request) {
@@ -29,12 +31,13 @@ public class AdminServiceImpl implements AdminService{
                         )
                 );
 
-        Roles role = rolesRepository.findByRoleName(request.getRole())
-                .orElseThrow(() ->
-                        new RoleNotFoundException(
-                                "Role not found" + request.getRole()
-                        )
-                );
+//        Roles role = rolesRepository.findByRoleName(request.getRole())
+//                .orElseThrow(() ->
+//                        new RoleNotFoundException(
+//                                "Role not found" + request.getRole()
+//                        )
+//                );
+        Roles role = roleCache.getRoleByName(request.getRole());
 
         String action = request.getAction().toUpperCase();
 

@@ -8,9 +8,15 @@ import lombok.AllArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @AllArgsConstructor
@@ -20,6 +26,7 @@ public class AuthController {
 
 
     private final AuthServiceImpl authService;
+    private final ClientRegistrationRepository clientRegistrationRepository;
 
 
     @PostMapping("/register-user")
@@ -66,6 +73,37 @@ public class AuthController {
                         "message", "Login Successfully",
                         "data", loginResponse
                 ));
+    }
+
+    @GetMapping("/oauth2-providers")
+    public ResponseEntity<?>listOfOAuth2(){
+
+        List<Map<String, String>> providers = new ArrayList<>();
+
+        if (clientRegistrationRepository instanceof InMemoryClientRegistrationRepository repo) {
+
+            for (ClientRegistration registration : repo) {
+
+                Map<String, String> provider = new HashMap<>();
+                provider.put("name", registration.getClientName());
+                provider.put(
+                        "authorizationUrl",
+                        "/oauth2/authorization/" + registration.getRegistrationId()
+                );
+
+                providers.add(provider);
+            }
+        }
+
+        providers.forEach(x-> System.out.println("OAuth2 Provider: " + x));
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "status", HttpStatus.OK.value(),
+                        "message", "List of OAuth2 Providers",
+                        "data", providers
+                )
+        );
     }
 
 

@@ -1,5 +1,6 @@
 package com.library.common.security;
 
+import com.library.common.utils.service.RoleCache;
 import com.library.user.entity.Roles;
 import com.library.user.entity.Users;
 import com.library.user.repository.RolesRepository;
@@ -21,6 +22,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UsersRepository usersRepository;
     private final RolesRepository rolesRepository;
+    private final RoleCache roleCache;
 
 
     @Override
@@ -37,8 +39,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             // Log for debugging
             System.out.println("OAuth2 User - Email: " + email + ", Name: " + name);
 
-            Roles roles = rolesRepository.findByRoleName("ROLE_USER")
-                    .orElseThrow(() -> new BadRequestException("Role USER not found"));
+            Roles roles = roleCache.getRoleByName("ROLE_USER");
 
             Users users = usersRepository.findByEmail(email).orElse(null);
 

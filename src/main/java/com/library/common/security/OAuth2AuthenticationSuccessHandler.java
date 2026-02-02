@@ -1,6 +1,7 @@
 package com.library.common.security;
 
 import com.library.common.exception.UserNotFoundException;
+import com.library.common.utils.service.RoleCache;
 import com.library.user.entity.Roles;
 import com.library.user.entity.Users;
 import com.library.user.repository.RolesRepository;
@@ -11,11 +12,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -25,6 +28,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
     private final JWTService jwtService;
     private final UsersRepository usersRepository;
     private final RolesRepository rolesRepository;
+    private final RoleCache roleCache;
 
 
     @Override
@@ -33,16 +37,23 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
         System.out.println("🔥 OAuth2AuthenticationSuccessHandler HIT 🔥");
 
        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        OAuth2AuthenticationToken oauthToken =
+                (OAuth2AuthenticationToken) authentication;
+
          String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
         String providerId = oAuth2User.getAttribute("sub");
+        System.out.println("OAuth2 provider:- " + oauthToken.getAuthorizedClientRegistrationId());
 
         System.out.println("Authenticated OAuth2 User Email: " + email);
         System.out.println("Authenticated OAuth2 User Name: " + name);
         System.out.println("Authenticated OAuth2 User Provider ID: " + providerId);
 
-        Roles roles = rolesRepository.findByRoleName("ROLE_USER")
-                .orElseThrow(() -> new BadRequestException("Role USER not found"));
+
+//        Roles roles = rolesRepository.findByRoleName("ROLE_USER")
+//                .orElseThrow(() -> new BadRequestException("Role USER not found"));
+
+        Roles roles = roleCache.getRoleByName("ROLE_USER");
 
         Users users = usersRepository.findByEmail(email)
                 .orElseGet(
@@ -51,6 +62,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
                             newUser.setEmail(email);
                             newUser.setName(name);
                             newUser.setProvider("GOOGLE");
+                            newUser.setProvider(oauthToken.getAuthorizedClientRegistrationId());
                             newUser.setProviderId(providerId); // Add this field if you have it
                             newUser.setPassword(null);
                             newUser.setPasswordSet(false);
@@ -79,7 +91,8 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
                 accessToken,
                 users.getEmail(),
                 users.isPasswordSet(),
-                users.getRoles()
+                users.getRoles().stream()
+                        .collect(Collectors.toList())
         ));
     }
 }
